@@ -1,0 +1,531 @@
+{
+  "info": {
+    "name": "AyushSkillBridge API Collection (SIH26044)",
+    "_postman_id": "ayush-skill-bridge-sih2026-coll",
+    "description": "Comprehensive API collection for AyushSkillBridge (Smart India Hackathon 2026 - Problem Statement SIH26044: Ministry of Ayush - AIIA)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "aiUrl",
+      "value": "http://127.0.0.1:8001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication & Sessions",
+      "item": [
+        {
+          "name": "Get Current Session & Active Persona",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            },
+            "description": "Returns current logged in user and active persona details."
+          }
+        },
+        {
+          "name": "Switch Persona (Student / Recruiter / Faculty / Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"persona\": \"recruiter_dabur\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "session"]
+            },
+            "description": "Switch persona cookie to simulate different stakeholders."
+          }
+        },
+        {
+          "name": "Mock ABHA ID Verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"abhaId\": \"91-4521-8890-1234\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/mock-abha",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "mock-abha"]
+            },
+            "description": "Validate 14-digit ABHA number with mock OTP verification."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Skills & Roles Ontologies",
+      "item": [
+        {
+          "name": "Get All Skills Catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/skills?domain=Panchakarma",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "skills"],
+              "query": [
+                {
+                  "key": "domain",
+                  "value": "Panchakarma",
+                  "description": "Filter by domain (e.g. Clinical, Panchakarma, Pharmacognosy)"
+                }
+              ]
+            },
+            "description": "List all 75 standardized Ayush skills with optional domain filter."
+          }
+        },
+        {
+          "name": "Get Role Ontologies & Weights",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "roles"]
+            },
+            "description": "List 16 industry role benchmarks with required skill vectors."
+          }
+        },
+        {
+          "name": "Submit Adaptive Assessment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": [\n    {\n      \"questionId\": \"q1_panchakarma\",\n      \"selectedOption\": 1,\n      \"skillId\": \"skl_vamana_01\",\n      \"domain\": \"Panchakarma\",\n      \"score\": 85\n    },\n    {\n      \"questionId\": \"q2_nadi\",\n      \"selectedOption\": 0,\n      \"skillId\": \"skl_nadi_01\",\n      \"domain\": \"Clinical\",\n      \"score\": 80\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/assessment/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "assessment", "submit"]
+            },
+            "description": "Submit question answers, update student skill vector, and receive recommended roles."
+          }
+        },
+        {
+          "name": "Run Gap Analysis for Target Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"role_ayush_clin_spec\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/gap-analysis",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gap-analysis"]
+            },
+            "description": "Compute radar matrix, cosine match score, and structured learning roadmap."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Opportunities & Applications",
+      "item": [
+        {
+          "name": "List Opportunities with Match Scores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/opportunities?type=INTERNSHIP&remote=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "opportunities"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "INTERNSHIP"
+                },
+                {
+                  "key": "remote",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Search opportunities with domain, remote, and stipend filters."
+          }
+        },
+        {
+          "name": "Get Opportunity Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/opportunities/opp_001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "opportunities", "opp_001"]
+            },
+            "description": "Get single opportunity by ID including required skill breakdown."
+          }
+        },
+        {
+          "name": "Post New Opportunity (Recruiter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Clinical Research Intern - Ayush Clinical Trials\",\n  \"description\": \"Assist in Phase II/III Ayurvedic clinical trials in compliance with GCP and ICMR guidelines.\",\n  \"type\": \"INTERNSHIP\",\n  \"domain\": \"Research\",\n  \"nsqfLevel\": 7,\n  \"stipend\": 25000,\n  \"location\": \"New Delhi\",\n  \"remote\": false,\n  \"durationMonths\": 6,\n  \"requiredSkills\": [\n    {\"skillId\": \"skl_gcp_01\", \"name\": \"Good Clinical Practice in Ayush\", \"weight\": 1.0, \"minLevel\": 3},\n    {\"skillId\": \"skl_data_01\", \"name\": \"Ayush Clinical Documentation\", \"weight\": 0.8, \"minLevel\": 3}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/opportunities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "opportunities"]
+            },
+            "description": "Post a new opening with NSQF Level and required competencies."
+          }
+        },
+        {
+          "name": "List Applications (Student or Recruiter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications"]
+            },
+            "description": "List applications submitted by student, or candidates for recruiter's posts."
+          }
+        },
+        {
+          "name": "Submit Application with Skill Passport",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opportunityId\": \"opp_001\",\n  \"coverNote\": \"I am a final year BAMS student at AIIA with extensive clinical DOAP logbook entries in Panchakarma.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications"]
+            },
+            "description": "Apply to an opportunity with current student skill vector snapshot."
+          }
+        },
+        {
+          "name": "Update Application Status (Shortlist / Offer)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SHORTLISTED\",\n  \"feedback\": \"Candidate displays strong Panchakarma procedural proficiency.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/app_001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "app_001"]
+            },
+            "description": "Recruiter moves application through pipeline states."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. CBME e-Logbook & Digital Credentials",
+      "item": [
+        {
+          "name": "Get Student e-Logbook Entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/logbook",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logbook"]
+            },
+            "description": "Retrieve student clinical procedure logs and DOAP statistics."
+          }
+        },
+        {
+          "name": "Log New Clinical Procedure (DOAP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"procedureName\": \"Kati Vasti (Lumbosacral Oil Pooling)\",\n  \"domain\": \"Panchakarma\",\n  \"doapLevel\": \"PERFORM\",\n  \"patientRef\": \"PT-2026-089\",\n  \"diagnosis\": \"Kativata (Lumbar Spondylosis)\",\n  \"notes\": \"Prepared medicated dough ring using Masha churna. Maintained Sahacharadi taila temperature for 30 minutes.\",\n  \"phiDeclaration\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/logbook",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logbook"]
+            },
+            "description": "Log a clinical procedure with mandatory PHI de-identification declaration."
+          }
+        },
+        {
+          "name": "Approve Procedure (Faculty)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": true,\n  \"feedback\": \"Good oil temperature control observed during procedure.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/logbook/log_001/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logbook", "log_001", "approve"]
+            },
+            "description": "Faculty verifies and digitally signs a student procedure."
+          }
+        },
+        {
+          "name": "Issue W3C Verifiable Credential",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Certified Panchakarma Practitioner\",\n  \"skills\": [\"skl_vamana_01\", \"skl_virechana_01\", \"skl_basti_01\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/credentials/issue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "credentials", "issue"]
+            },
+            "description": "Generate cryptographically signed W3C Verifiable Credential token."
+          }
+        },
+        {
+          "name": "Public Cryptographic Verification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/credentials/verify?token=sample_token_here",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "credentials", "verify"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "sample_token_here"
+                }
+              ]
+            },
+            "description": "Public instant verification validating HMAC-SHA256 signature and tamper check."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Institutional & Admin Governance",
+      "item": [
+        {
+          "name": "Get Department Skill Gap Stats & NAAC Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dept/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dept", "stats"]
+            },
+            "description": "Retrieve cohort skill gap heatmap, syllabus update alert (>40% threshold), and NAAC Criterion 1/2 report."
+          }
+        },
+        {
+          "name": "Approve Industry Organization (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verified\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/organizations/org_001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "organizations", "org_001"]
+            },
+            "description": "Ministry admin verifies and approves industry healthcare partner."
+          }
+        },
+        {
+          "name": "AI Extract Skills & Expand Ontology (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"The clinical curriculum must cover Shirodhara with Ksheerabala taila, Takradhara, and modern electronic health record documentation using the Ayush NAMASTE portal.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/ontology",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "ontology"]
+            },
+            "description": "Extract recognized Ayush competencies from uploaded syllabus or policy documents."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Python AI Microservice (Port 8001)",
+      "item": [
+        {
+          "name": "AI Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{aiUrl}}/health",
+              "host": ["{{aiUrl}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "AI Extract Skills from Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Proficient in Vamana Karma, Nadi Pariksha, and Good Clinical Practice in herbal formulations.\"\n}"
+            },
+            "url": {
+              "raw": "{{aiUrl}}/extract-skills-from-text",
+              "host": ["{{aiUrl}}"],
+              "path": ["extract-skills-from-text"]
+            }
+          }
+        },
+        {
+          "name": "AI Rank Opportunities (Cosine Matcher)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSkills\": [\n    {\"skillId\": \"skl_vamana_01\", \"level\": 4},\n    {\"skillId\": \"skl_nadi_01\", \"level\": 4}\n  ],\n  \"opportunities\": [\n    {\n      \"id\": \"opp_001\",\n      \"title\": \"Panchakarma Resident Doctor\",\n      \"requiredSkills\": [\n        {\"skillId\": \"skl_vamana_01\", \"weight\": 1.0, \"minLevel\": 3},\n        {\"skillId\": \"skl_gcp_01\", \"weight\": 0.8, \"minLevel\": 2}\n      ]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{aiUrl}}/recommend-opportunities",
+              "host": ["{{aiUrl}}"],
+              "path": ["recommend-opportunities"]
+            }
+          }
+        },
+        {
+          "name": "AI Analyze Resume & Detect Gaps",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Completed BAMS from AIIA. Experience performing Shirodhara and Kati Vasti in OPD. Basic understanding of HPLC standardization.\",\n  \"targetRoleId\": \"role_panchakarma_therapist\"\n}"
+            },
+            "url": {
+              "raw": "{{aiUrl}}/analyze-resume",
+              "host": ["{{aiUrl}}"],
+              "path": ["analyze-resume"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

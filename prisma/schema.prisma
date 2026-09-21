@@ -1,0 +1,239 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  phone           String?
+  abhaId          String?          @unique
+  role            String           @default("STUDENT") // STUDENT | INDUSTRY | ACADEMICIAN | ADMIN
+  stream          String?          // BAMS | BHMS | BSMS | BUMS | BYMS | PHARMA | RESEARCH | OTHER
+  year            Int?
+  locationCity    String?
+  locationState   String?
+  availability    String?
+  interests          String           @default("[]") // JSON string of interest tags
+  consentFlags       String           @default("{\"shareProfileWithInstitutions\":true,\"shareSkillData\":true,\"allowAnonymizedAnalytics\":true}") // JSON string
+  ayurId             String?          @unique // Unique Ayush Student ID e.g. AYUR-2026-AIIA-0042
+  graduationMarks    Float?           // Percentage marks achieved upon graduation
+  cgpa               Float?
+  meritRank          Int?             // Cohort / Institutional merit rank
+  collegeRollNo      String?
+  passingYear        Int?             @default(2026)
+  isCollegeVerified  Boolean          @default(false)
+  institutionId      String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  skills          UserSkill[]
+  applications    Application[]
+  logbookEntries  LogbookEntry[]
+  credentials     Credential[]
+  learningPlans   LearningPlan[]
+  institution     Institution?     @relation(fields: [institutionId], references: [id])
+
+  @@index([role])
+  @@index([stream])
+}
+
+model Skill {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  domain      String      // CLINICAL | PHARMA | RESEARCH | WELLNESS | DIGITAL_HEALTH | EMPLOYABILITY
+  nsqfLevel   Int?        // 1 to 10
+  description String
+
+  roleSkills  RoleSkill[]
+  userSkills  UserSkill[]
+
+  @@index([domain])
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  title       String       @unique
+  domain      String       // CLINICAL | PHARMA | RESEARCH | WELLNESS | DIGITAL_HEALTH | EMPLOYABILITY
+  description String
+
+  roleSkills  RoleSkill[]
+
+  @@index([domain])
+}
+
+model RoleSkill {
+  id       String  @id @default(cuid())
+  roleId   String
+  skillId  String
+  weight   Float   @default(1.0) // 0.0 to 1.0
+
+  role     Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  skill    Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, skillId])
+  @@index([roleId])
+  @@index([skillId])
+}
+
+model UserSkill {
+  id            String   @id @default(cuid())
+  userId        String
+  skillId       String
+  level         String   @default("BASIC") // NONE | BASIC | INTERMEDIATE | ADVANCED | EXPERT
+  evidenceCount Int      @default(1)
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill         Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model Institution {
+  id            String        @id @default(cuid())
+  name          String
+  type          String        // COLLEGE | HOSPITAL | CLINIC | RESEARCH_LAB | PHARMA | WELLNESS_CENTER
+  verified      Boolean       @default(false)
+  documents     String        @default("[]") // JSON string of doc URLs
+  contactEmail  String
+  contactPhone  String?
+  address       String        @default("{}") // JSON string
+  ayushGridId        String?       @unique
+  ayushAffiliationNo String?       @unique // e.g. AYUSH-NCISM-DL-001
+  accreditationGrade String?       @default("NCISM Grade A+ / NAAC A++")
+  sanctionedIntake   Int?          @default(100)
+  principalName      String?
+
+  users         User[]
+  opportunities Opportunity[]
+
+  @@index([type])
+  @@index([verified])
+}
+
+model Opportunity {
+  id                 String        @id @default(cuid())
+  orgId              String
+  title              String
+  type               String        // INTERNSHIP | JOB | MICRO_INTERNSHIP | FACULTY_TRAINING
+  description        String
+  requiredSkills     String        @default("[]") // JSON string: [{skillId, minLevel}]
+  minGraduationMarks Float?        @default(55.0) // Minimum graduation percentage required
+  stipend            Int?          @default(0)
+  durationWeeks  Int           @default(8)
+  location       String        @default("Remote")
+  remote         Boolean       @default(false)
+  mentorName     String?
+  mentorTitle    String?
+  nsqfLevel      Int?          @default(4)
+  verified       Boolean       @default(true)
+  status         String        @default("ACTIVE") // DRAFT | ACTIVE | CLOSED
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Institution   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  applications   Application[]
+
+  @@index([type])
+  @@index([status])
+  @@index([orgId])
+}
+
+model Application {
+  id            String      @id @default(cuid())
+  opportunityId String
+  userId        String
+  status        String      @default("APPLIED") // APPLIED | SHORTLISTED | INTERVIEW | OFFER | REJECTED | WITHDRAWN
+  matchScore    Float       @default(0.0) // 0.0 to 1.0
+  resumeUrl     String?
+  coverLetter   String?
+  feedback      String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, userId])
+  @@index([opportunityId])
+  @@index([userId])
+  @@index([status])
+}
+
+model LogbookEntry {
+  id                         String    @id @default(cuid())
+  userId                     String
+  competencyCode             String    // e.g., AY-PK-01
+  competencyName             String    // e.g., Shirodhara Setup and Oil Temperature Standardization
+  domain                     String    // CLINICAL | PHARMA | RESEARCH | WELLNESS | DIGITAL_HEALTH | EMPLOYABILITY
+  level                      String    // DO | OA | AP | PE (Demonstrate, Observe, Assist, Perform)
+  count                      Int       @default(1)
+  notes                      String?
+  attachments                String    @default("[]") // JSON string
+  mentorId                   String?
+  approved                   Boolean   @default(false)
+  approvedAt                 DateTime?
+  noPatientIdentifiableInfo  Boolean   @default(true) // Clinical privacy consent
+  createdAt                  DateTime  @default(now())
+
+  user                       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([domain])
+  @@index([approved])
+}
+
+model Credential {
+  id           String    @id @default(cuid())
+  userId       String
+  type         String    // INTERNSHIP_COMPLETION | MICRO_CREDENTIAL | LOGBOOK_MILESTONE
+  metadataJson String    // JSON string conforming to W3C VC data model
+  vcHash       String    // Cryptographic hash (HMAC-SHA256 signature)
+  qrToken      String    @unique // Public token for QR scan
+  issuedAt     DateTime  @default(now())
+  expiresAt    DateTime?
+  revoked      Boolean   @default(false)
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([qrToken])
+  @@index([type])
+}
+
+model LearningPlan {
+  id           String    @id @default(cuid())
+  userId       String
+  roleId       String
+  gapSkills    String    @default("[]") // JSON string
+  roadmapJson  String    @default("[]") // JSON string of steps
+  status       String    @default("ACTIVE") // ACTIVE | COMPLETED
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String
+  action      String   // CREATE, UPDATE, DELETE, APPROVE, ISSUE_CREDENTIAL, VERIFY_ORG
+  entityType  String   // User, Opportunity, Application, LogbookEntry, Credential, Institution
+  entityId    String
+  timestamp   DateTime @default(now())
+  metadata    String   @default("{}") // JSON string
+
+  @@index([actorUserId])
+  @@index([entityType])
+  @@index([action])
+}

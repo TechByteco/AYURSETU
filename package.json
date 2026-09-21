@@ -1,0 +1,44 @@
+{
+  "name": "ayush-skill-bridge",
+  "version": "1.0.0",
+  "description": "SIH26044 AyushSkillBridge: Academia-Industry Collaboration Platform for Skill Mapping, Internships, and Placement",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "test:api": "node test-api.mjs",
+    "test:e2e": "node test-e2e.mjs"
+  },
+  "dependencies": {
+    "@designcodeio/threeui": "^1.2.0",
+    "@prisma/client": "^5.19.1",
+    "@supabase/supabase-js": "^2.116.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.5.4",
+    "lucide-react": "^0.439.0",
+    "next": "14.2.11",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-use-measure": "^2.1.7",
+    "tailwind-merge": "^2.5.2",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "prisma": "^5.19.1",
+    "puppeteer": "^23.3.0",
+    "tailwindcss": "^3.4.11",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}

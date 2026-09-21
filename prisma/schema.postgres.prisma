@@ -1,0 +1,306 @@
+// Production PostgreSQL Schema for Deployment (Render / Railway / AWS / Cloud SQL)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  STUDENT
+  INDUSTRY
+  ACADEMICIAN
+  ADMIN
+}
+
+enum StreamType {
+  BAMS
+  BHMS
+  BSMS
+  BUMS
+  BYMS
+  PHARMA
+  RESEARCH
+  OTHER
+}
+
+enum DomainType {
+  CLINICAL
+  PHARMA
+  RESEARCH
+  WELLNESS
+  DIGITAL_HEALTH
+  EMPLOYABILITY
+}
+
+enum SkillLevel {
+  NONE
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum InstitutionType {
+  COLLEGE
+  HOSPITAL
+  CLINIC
+  RESEARCH_LAB
+  PHARMA
+  WELLNESS_CENTER
+}
+
+enum OpportunityType {
+  INTERNSHIP
+  JOB
+  MICRO_INTERNSHIP
+  FACULTY_TRAINING
+}
+
+enum OpportunityStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum DOAPLevel {
+  DO
+  OA
+  AP
+  PE
+}
+
+enum CredentialType {
+  INTERNSHIP_COMPLETION
+  MICRO_CREDENTIAL
+  LOGBOOK_MILESTONE
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  phone           String?
+  abhaId          String?          @unique
+  role            RoleType         @default(STUDENT)
+  stream          StreamType?
+  year            Int?
+  locationCity    String?
+  locationState   String?
+  availability    String?
+  interests       Json             @default("[]")
+  consentFlags    Json             @default("{\"shareProfileWithInstitutions\":true,\"shareSkillData\":true,\"allowAnonymizedAnalytics\":true}")
+  institutionId   String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  skills          UserSkill[]
+  applications    Application[]
+  logbookEntries  LogbookEntry[]
+  credentials     Credential[]
+  learningPlans   LearningPlan[]
+  institution     Institution?     @relation(fields: [institutionId], references: [id])
+
+  @@index([role])
+  @@index([stream])
+}
+
+model Skill {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  domain      DomainType
+  nsqfLevel   Int?
+  description String
+
+  roleSkills  RoleSkill[]
+  userSkills  UserSkill[]
+
+  @@index([domain])
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  title       String       @unique
+  domain      DomainType
+  description String
+
+  roleSkills  RoleSkill[]
+
+  @@index([domain])
+}
+
+model RoleSkill {
+  id       String  @id @default(cuid())
+  roleId   String
+  skillId  String
+  weight   Float   @default(1.0)
+
+  role     Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  skill    Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, skillId])
+  @@index([roleId])
+  @@index([skillId])
+}
+
+model UserSkill {
+  id            String     @id @default(cuid())
+  userId        String
+  skillId       String
+  level         SkillLevel @default(BASIC)
+  evidenceCount Int        @default(1)
+  updatedAt     DateTime   @updatedAt
+
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill         Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model Institution {
+  id            String          @id @default(cuid())
+  name          String
+  type          InstitutionType
+  verified      Boolean         @default(false)
+  documents     Json            @default("[]")
+  contactEmail  String
+  contactPhone  String?
+  address       Json            @default("{}")
+  ayushGridId   String?         @unique
+
+  users         User[]
+  opportunities Opportunity[]
+
+  @@index([type])
+  @@index([verified])
+}
+
+model Opportunity {
+  id             String            @id @default(cuid())
+  orgId          String
+  title          String
+  type           OpportunityType
+  description    String
+  requiredSkills Json              @default("[]")
+  stipend        Int?              @default(0)
+  durationWeeks  Int               @default(8)
+  location       String            @default("Remote")
+  remote         Boolean           @default(false)
+  mentorName     String?
+  mentorTitle    String?
+  nsqfLevel      Int?              @default(4)
+  verified       Boolean           @default(true)
+  status         OpportunityStatus @default(ACTIVE)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization   Institution       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  applications   Application[]
+
+  @@index([type])
+  @@index([status])
+  @@index([orgId])
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  opportunityId String
+  userId        String
+  status        ApplicationStatus @default(APPLIED)
+  matchScore    Float             @default(0.0)
+  resumeUrl     String?
+  coverLetter   String?
+  feedback      String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  opportunity   Opportunity       @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, userId])
+  @@index([opportunityId])
+  @@index([userId])
+  @@index([status])
+}
+
+model LogbookEntry {
+  id                         String         @id @default(cuid())
+  userId                     String
+  competencyCode             String
+  competencyName             String
+  domain                     DomainType
+  level                      DOAPLevel
+  count                      Int            @default(1)
+  notes                      String?
+  attachments                Json           @default("[]")
+  mentorId                   String?
+  approved                   Boolean        @default(false)
+  approvedAt                 DateTime?
+  noPatientIdentifiableInfo  Boolean        @default(true)
+  createdAt                  DateTime       @default(now())
+
+  user                       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([domain])
+  @@index([approved])
+}
+
+model Credential {
+  id           String         @id @default(cuid())
+  userId       String
+  type         CredentialType
+  metadataJson Json
+  vcHash       String
+  qrToken      String         @unique
+  issuedAt     DateTime       @default(now())
+  expiresAt    DateTime?
+  revoked      Boolean        @default(false)
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([qrToken])
+  @@index([type])
+}
+
+model LearningPlan {
+  id           String    @id @default(cuid())
+  userId       String
+  roleId       String
+  gapSkills    Json      @default("[]")
+  roadmapJson  Json      @default("[]")
+  status       String    @default("ACTIVE")
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String
+  action      String
+  entityType  String
+  entityId    String
+  timestamp   DateTime @default(now())
+  metadata    Json     @default("{}")
+
+  @@index([actorUserId])
+  @@index([entityType])
+  @@index([action])
+}
