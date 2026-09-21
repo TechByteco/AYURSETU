@@ -4,7 +4,8 @@
   "description": "SIH26044 AyushSkillBridge: Academia-Industry Collaboration Platform for Skill Mapping, Internships, and Placement",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
