@@ -5,7 +5,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com data:;
   img-src 'self' data: blob: https://images.unsplash.com https://media.gettyimages.com https://*.google.com https://*.googleusercontent.com;
-  connect-src 'self' http://localhost:8001 http://127.0.0.1:8001 https://fonts.googleapis.com https://fonts.gstatic.com;
+  connect-src 'self' https://*.supabase.co https://*.supabase.in http://localhost:8001 http://127.0.0.1:8001 https://fonts.googleapis.com https://fonts.gstatic.com;
   frame-ancestors 'none';
   base-uri 'self';
   form-action 'self';
