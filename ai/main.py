@@ -28,6 +28,16 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+def read_root():
+    return {
+        "service": "AyushSkillBridge AI Microservice",
+        "status": "online",
+        "version": "1.0.0",
+        "endpoints": ["/api/ai/extract-skills", "/api/ai/match", "/api/ai/resume-diagnostics"]
+    }
+
+
 class ExtractSkillsRequest(BaseModel):
     text: str = Field(..., description="Document, syllabus, or portfolio text")
 
